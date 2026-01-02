@@ -1,0 +1,1523 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cuddle Puddle™ — PDP Prototype (Blanket + Bundles + Upsell)</title>
+  <meta name="description" content="Cuddle Puddle™ — prototype PDP: blanket + discreet add-on, bundles, cart drawer, age gate, upsells, FAQ." />
+  <style>
+    :root{
+      --bg:#0b0b12;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.085);
+      --stroke: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --muted2: rgba(255,255,255,.45);
+
+      --brand:#7a66ac;
+      --brand2:#9b7dff;
+      --ok:#41d8a7;
+      --warn:#ffd166;
+
+      --shadow: 0 22px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+      --radius2: 26px;
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Arial, system-ui, sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      background:
+        radial-gradient(1200px 600px at 15% 10%, rgba(122,102,172,.22), transparent 55%),
+        radial-gradient(900px 500px at 75% 20%, rgba(155,125,255,.18), transparent 52%),
+        radial-gradient(900px 500px at 70% 80%, rgba(65,216,167,.10), transparent 55%),
+        linear-gradient(180deg, #070710, #0b0b12);
+      color: var(--text);
+      overflow-x:hidden;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    .wrap{ max-width: 1180px; margin: 0 auto; padding: 24px; }
+
+    /* top bar */
+    .topbar{
+      position: sticky; top:0; z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(10,10,18,.65);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .topbar .row{
+      display:flex; gap:14px; align-items:center; justify-content:space-between;
+      max-width: 1180px; margin: 0 auto; padding: 14px 24px;
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center;
+      min-width: 240px;
+    }
+    .logo{
+      width:40px; height:40px; border-radius: 14px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.25), transparent 55%),
+                  linear-gradient(135deg, rgba(122,102,172,1), rgba(155,125,255,1));
+      box-shadow: 0 10px 24px rgba(122,102,172,.35);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800;
+    }
+    .brand h1{ margin:0; font-size: 14px; letter-spacing:.6px; text-transform:uppercase; }
+    .brand .sub{ font-size: 12px; color: var(--muted); margin-top:2px; }
+
+    .nav{
+      display:flex; gap: 8px; align-items:center;
+      flex-wrap:wrap;
+      justify-content:center;
+      flex: 1;
+    }
+    .chip{
+      padding: 9px 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+      transition: .18s ease;
+      user-select:none;
+    }
+    .chip:hover{ background: rgba(255,255,255,.07); color: rgba(255,255,255,.82); border-color: rgba(255,255,255,.16); }
+
+    .actions{
+      display:flex; gap:10px; align-items:center; justify-content:flex-end;
+      min-width: 260px;
+    }
+
+    .btn{
+      border:0;
+      cursor:pointer;
+      border-radius: 14px;
+      padding: 11px 14px;
+      font-weight: 700;
+      color: rgba(255,255,255,.95);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      transition: .18s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(122,102,172,1), rgba(155,125,255,1));
+      border-color: rgba(255,255,255,.0);
+      box-shadow: 0 14px 40px rgba(122,102,172,.35);
+    }
+    .btn.primary:hover{ filter: brightness(1.03); }
+    .btn.ghost{
+      background: rgba(255,255,255,.02);
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      font-size: 12px;
+      color: rgba(255,255,255,.75);
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+    }
+    .dot{ width:8px; height:8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 6px rgba(65,216,167,.10); }
+
+    /* layout */
+    .grid{
+      display:grid;
+      grid-template-columns: 1.35fr .9fr;
+      gap: 16px;
+      align-items:start;
+      margin-top: 18px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .actions{ min-width: unset; }
+      .brand{ min-width: unset; }
+    }
+
+    .card{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .inner{ padding: 18px; }
+
+    .hero{
+      position: relative;
+      padding: 18px;
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(900px 500px at 20% 15%, rgba(122,102,172,.20), transparent 55%),
+        radial-gradient(700px 420px at 75% 25%, rgba(65,216,167,.12), transparent 58%),
+        rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+    }
+    .heroTop{
+      display:flex; gap: 14px; align-items:flex-start; justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .kicker{
+      display:inline-flex; gap: 10px; align-items:center;
+      font-size: 12px; color: rgba(255,255,255,.75);
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: 999px;
+    }
+    .kicker b{ color: rgba(255,255,255,.92); }
+    .title{
+      margin: 12px 0 8px;
+      font-size: 32px;
+      line-height: 1.06;
+      letter-spacing: -0.6px;
+    }
+    .title span{ color: rgba(155,125,255,.95); }
+    .lead{
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 68ch;
+    }
+
+    .pills{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 8px; }
+    .pill{
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: 999px;
+    }
+    .pill strong{ color: rgba(255,255,255,.92); }
+    .pill.ok{ border-color: rgba(65,216,167,.25); background: rgba(65,216,167,.08); }
+    .pill.warn{ border-color: rgba(255,209,102,.20); background: rgba(255,209,102,.08); }
+
+    .heroMain{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      margin-top: 16px;
+      align-items: start;
+    }
+    @media (max-width: 980px){
+      .heroMain{ grid-template-columns: 1fr; }
+    }
+
+    /* product mock image */
+    .mock{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(120px 90px at 30% 35%, rgba(255,255,255,.16), transparent 60%),
+        radial-gradient(240px 160px at 65% 40%, rgba(155,125,255,.18), transparent 65%),
+        radial-gradient(260px 180px at 50% 75%, rgba(65,216,167,.10), transparent 60%),
+        rgba(255,255,255,.03);
+      min-height: 320px;
+      position: relative;
+      overflow:hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    .mock .tag{
+      position:absolute; top:14px; left:14px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      font-size: 12px;
+      color: rgba(255,255,255,.80);
+    }
+    .mock .shape1{
+      position:absolute; inset:auto auto 18px 18px;
+      width: 64%; height: 48%;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(122,102,172,.50), rgba(155,125,255,.20));
+      filter: blur(.0px);
+      opacity: .85;
+      transform: rotate(-2deg);
+    }
+    .mock .shape2{
+      position:absolute; inset: 20% 10% auto auto;
+      width: 48%; height: 40%;
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(65,216,167,.35), rgba(255,255,255,.06));
+      opacity: .9;
+      transform: rotate(3deg);
+    }
+    .mock .caption{
+      position:absolute; bottom:14px; left:14px; right:14px;
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+    }
+    .miniStat{
+      flex:1;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+    }
+    .miniStat b{ display:block; color: rgba(255,255,255,.92); margin-bottom:2px; }
+
+    /* PDP */
+    .pdp{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      padding: 16px;
+    }
+    .sectionTitle{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 10px;
+      margin: 0 0 10px;
+    }
+    .sectionTitle h3{ margin:0; font-size: 14px; letter-spacing:.2px; }
+    .muted{ color: var(--muted); }
+
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 520px){ .row2{ grid-template-columns: 1fr; } }
+
+    .field{
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+    .field label{
+      display:block;
+      font-size: 11px;
+      color: rgba(255,255,255,.65);
+      margin-bottom: 6px;
+      letter-spacing: .2px;
+    }
+    select, input{
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.92);
+      padding: 10px 10px;
+      outline: none;
+      font-weight: 650;
+    }
+
+    .priceRow{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .priceBox{
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .price{
+      font-size: 28px;
+      letter-spacing: -0.6px;
+      font-weight: 850;
+    }
+    .strike{ color: rgba(255,255,255,.45); text-decoration: line-through; font-size: 13px; }
+    .save{ color: rgba(65,216,167,.92); font-size: 13px; font-weight: 750; }
+
+    .ctaRow{
+      display:flex; gap:10px; margin-top: 12px; flex-wrap:wrap;
+    }
+    .ctaRow .btn{ flex: 1; min-width: 180px; }
+    .note{
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.70);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      padding: 10px 12px;
+      border-radius: 16px;
+    }
+    .note b{ color: rgba(255,255,255,.92); }
+
+    /* add-on block */
+    .addon{
+      margin-top: 12px;
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      overflow:hidden;
+    }
+    .addonHead{
+      padding: 14px 14px 10px;
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 10px;
+    }
+    .addonHead h4{ margin:0; font-size: 14px; }
+    .addonHead .small{ font-size: 12px; color: rgba(255,255,255,.62); margin-top: 4px; line-height:1.45; }
+    .addonBody{ padding: 0 14px 14px; }
+    .addonLine{
+      display:flex; gap: 10px; align-items:center; justify-content:space-between;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      flex-wrap:wrap;
+    }
+    .addonLeft{
+      display:flex; gap: 10px; align-items:center;
+      min-width: 240px;
+    }
+    .addonIcon{
+      width: 38px; height: 38px;
+      border-radius: 14px;
+      display:flex; align-items:center; justify-content:center;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(122,102,172,.18);
+      font-weight: 900;
+    }
+    .addonName{ font-weight: 850; letter-spacing:.1px; }
+    .addonMeta{ font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px; }
+    .addonRight{
+      display:flex; gap:10px; align-items:center; justify-content:flex-end;
+    }
+    .toggle{
+      display:flex; align-items:center; gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      user-select:none;
+      cursor:pointer;
+    }
+    .switch{
+      width: 44px; height: 24px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.25);
+      position: relative;
+    }
+    .knob{
+      width: 18px; height: 18px; border-radius: 50%;
+      position:absolute; top: 2px; left: 2px;
+      background: rgba(255,255,255,.70);
+      transition: .18s ease;
+    }
+    .toggle.on .switch{ background: rgba(65,216,167,.18); border-color: rgba(65,216,167,.28); }
+    .toggle.on .knob{ left: 22px; background: rgba(65,216,167,.92); }
+
+    /* bundles */
+    .bundleGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .bundle{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      padding: 14px;
+    }
+    .bundleTop{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 10px; flex-wrap:wrap;
+    }
+    .bundleTop h4{ margin:0; font-size: 14px; }
+    .bundleTop .hint{ font-size: 12px; color: rgba(255,255,255,.62); }
+    .bundleItems{
+      display:flex; flex-wrap:wrap; gap: 8px; margin-top: 10px;
+    }
+    .itemTag{
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      color: rgba(255,255,255,.78);
+    }
+    .bundleBottom{
+      display:flex; align-items:center; justify-content:space-between;
+      gap: 10px; flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    .bundlePrice{
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing:-0.2px;
+    }
+    .bundlePrice small{
+      font-weight: 800;
+      color: rgba(65,216,167,.90);
+      margin-left: 8px;
+      font-size: 12px;
+    }
+    .bundle .btn{ padding: 10px 12px; }
+
+    /* right column blocks */
+    .side{
+      display:flex; flex-direction:column; gap: 16px;
+    }
+    .miniCard{
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      box-shadow: var(--shadow);
+    }
+    .miniCard .inner{ padding: 16px; }
+    .miniCard h3{
+      margin:0 0 8px; font-size: 14px;
+      display:flex; align-items:center; gap: 10px;
+    }
+    .list{
+      margin: 10px 0 0;
+      padding: 0;
+      list-style:none;
+      display:flex; flex-direction:column; gap: 10px;
+    }
+    .list li{
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      color: rgba(255,255,255,.76);
+      line-height: 1.45;
+      font-size: 12px;
+    }
+    .list b{ color: rgba(255,255,255,.92); }
+
+    .faq details{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 12px;
+    }
+    .faq summary{
+      cursor:pointer;
+      font-weight: 850;
+      color: rgba(255,255,255,.86);
+      outline:none;
+      list-style:none;
+    }
+    .faq summary::-webkit-details-marker{ display:none; }
+    .faq p{
+      margin: 10px 0 0;
+      color: rgba(255,255,255,.72);
+      line-height:1.55;
+      font-size: 12px;
+    }
+
+    /* cart drawer */
+    .drawerOverlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0; pointer-events:none;
+      transition: .18s ease;
+      z-index: 50;
+    }
+    .drawerOverlay.show{ opacity:1; pointer-events:all; }
+
+    .drawer{
+      position:fixed; top:0; right:0; height:100%;
+      width: min(440px, 100%);
+      background: rgba(12,12,20,.92);
+      backdrop-filter: blur(16px);
+      border-left: 1px solid rgba(255,255,255,.10);
+      transform: translateX(110%);
+      transition: .22s ease;
+      z-index: 60;
+      display:flex; flex-direction:column;
+    }
+    .drawer.show{ transform: translateX(0); }
+    .drawerHeader{
+      padding: 16px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .drawerHeader h3{ margin:0; font-size: 14px; letter-spacing:.2px; }
+    .closeBtn{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.88);
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor:pointer;
+      font-weight: 850;
+    }
+    .drawerBody{
+      padding: 16px;
+      overflow:auto;
+      display:flex; flex-direction:column; gap: 12px;
+    }
+    .cartItem{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      padding: 12px;
+      display:flex; gap: 10px; justify-content:space-between; align-items:flex-start;
+    }
+    .cartItem .name{ font-weight: 900; }
+    .cartItem .meta{ font-size: 12px; color: rgba(255,255,255,.62); margin-top: 3px; line-height: 1.4; }
+    .qty{
+      display:flex; align-items:center; gap: 8px;
+      margin-top: 10px;
+    }
+    .qty button{
+      width: 30px; height: 30px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.20);
+      color: rgba(255,255,255,.88);
+      cursor:pointer;
+      font-weight: 900;
+    }
+    .qty span{ min-width: 22px; text-align:center; font-weight: 900; }
+    .cartItem .price{ font-size: 14px; font-weight: 950; }
+    .remove{
+      margin-top: 8px;
+      font-size: 12px;
+      color: rgba(255,255,255,.58);
+      cursor:pointer;
+      text-decoration: underline;
+      text-decoration-color: rgba(255,255,255,.25);
+      display:inline-block;
+    }
+
+    .upsellBox{
+      border-radius: 18px;
+      border: 1px solid rgba(65,216,167,.22);
+      background: rgba(65,216,167,.08);
+      padding: 12px;
+    }
+    .upsellBox h4{ margin:0 0 6px; font-size: 13px; }
+    .upsellBox p{ margin:0; font-size: 12px; color: rgba(255,255,255,.76); line-height:1.45; }
+    .upsellBox .btn{
+      margin-top: 10px;
+      width: 100%;
+      background: rgba(65,216,167,.14);
+      border-color: rgba(65,216,167,.28);
+    }
+
+    .drawerFooter{
+      padding: 16px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display:flex; flex-direction:column; gap: 10px;
+    }
+    .totals{
+      display:flex; justify-content:space-between; gap: 10px; align-items:center;
+      color: rgba(255,255,255,.82);
+      font-weight: 850;
+    }
+    .totals small{ color: rgba(255,255,255,.60); font-weight: 800; }
+    .checkoutNote{
+      font-size: 12px;
+      color: rgba(255,255,255,.70);
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 10px 12px;
+      border-radius: 16px;
+      line-height: 1.45;
+    }
+
+    /* age gate */
+    .modalOverlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.66);
+      z-index: 80;
+      display:none;
+      align-items:center; justify-content:center;
+      padding: 24px;
+    }
+    .modalOverlay.show{ display:flex; }
+    .modal{
+      width: min(620px, 100%);
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.12);
+      background:
+        radial-gradient(900px 500px at 20% 15%, rgba(122,102,172,.22), transparent 55%),
+        rgba(12,12,20,.92);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .modal h2{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:-0.2px;
+    }
+    .modal p{
+      margin: 10px 0 0;
+      color: rgba(255,255,255,.72);
+      line-height: 1.55;
+      font-size: 13px;
+    }
+    .modal .cols{
+      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-top: 14px;
+    }
+    @media (max-width: 620px){ .modal .cols{ grid-template-columns: 1fr; } }
+    .modal .tile{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      padding: 12px;
+      font-size: 12px;
+      color: rgba(255,255,255,.75);
+      line-height: 1.5;
+    }
+    .modal .tile b{ color: rgba(255,255,255,.90); }
+    .modal .footer{
+      margin-top: 14px;
+      display:flex; gap: 10px; flex-wrap:wrap;
+    }
+    .modal .footer .btn{ flex:1; min-width: 180px; }
+
+    /* anchors */
+    .anchor{ scroll-margin-top: 90px; }
+    .tiny{ font-size: 12px; color: rgba(255,255,255,.62); }
+    .mono{ font-family: var(--mono); }
+
+    /* toast */
+    .toast{
+      position: fixed;
+      left: 50%; bottom: 22px;
+      transform: translateX(-50%) translateY(20px);
+      opacity:0;
+      transition: .18s ease;
+      z-index: 90;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(12,12,20,.88);
+      backdrop-filter: blur(12px);
+      color: rgba(255,255,255,.86);
+      font-size: 12px;
+      box-shadow: var(--shadow);
+    }
+    .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+
+<body>
+  <!-- Age gate modal -->
+  <div class="modalOverlay" id="ageGate">
+    <div class="modal">
+      <div class="kicker">🔒 <b>18+</b> • Приватный раздел (discreet wellness)</div>
+      <h2>Подтвердите возраст</h2>
+      <p>
+        Этот прототип показывает <b>как выглядит “Private / Wellness”</b> внутри магазина — без откровенного контента,
+        только нейтральная подача и приватная доставка.
+      </p>
+
+      <div class="cols">
+        <div class="tile">
+          ✅ <b>Можно</b><br>
+          Нейтральные формулировки • Self-care • Recovery • Discreet packaging
+        </div>
+        <div class="tile">
+          ❌ <b>Нельзя</b><br>
+          Explicit-сцены • Вульгарные слова • “Шок-креатив” • Давление на запретные темы
+        </div>
+      </div>
+
+      <div class="footer">
+        <button class="btn primary" id="confirmAge">Да, мне 18+</button>
+        <button class="btn ghost" id="leaveSite">Выйти</button>
+      </div>
+
+      <p class="tiny" style="margin-top:10px;">
+        * Это демо-макет для команды. В реальном Shopify поведение делается через theme + apps (age gate / upsell / bundles).
+      </p>
+    </div>
+  </div>
+
+  <!-- Cart drawer -->
+  <div class="drawerOverlay" id="drawerOverlay"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawerHeader">
+      <h3>🛒 Корзина (prototype)</h3>
+      <button class="closeBtn" id="closeCart">Закрыть ✕</button>
+    </div>
+
+    <div class="drawerBody" id="cartItems"></div>
+
+    <div class="drawerFooter">
+      <div class="upsellBox" id="cartUpsell" style="display:none;">
+        <h4>🔥 Рекомендация “без риска”</h4>
+        <p>Добавь <b>Discreet Wellness Add-On</b> к заказу — это поднимает чек, не меняя рекламу.</p>
+        <button class="btn" id="addUpsellBtn">➕ Добавить add-on</button>
+      </div>
+
+      <div class="totals">
+        <div>Итого <small>(demo)</small></div>
+        <div class="mono" id="cartTotal">$0</div>
+      </div>
+
+      <button class="btn primary" id="checkoutBtn">Перейти к checkout →</button>
+
+      <div class="checkoutNote">
+        🕵️‍♂️ <b>Discreet shipping</b>: упаковка без явных названий. <br>
+        ✅ Простые возвраты • ✅ Поддержка 24/7 • ✅ SSL-оплата (в реале).
+      </div>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="row">
+      <div class="brand">
+        <div class="logo">CP</div>
+        <div>
+          <h1>Cuddle Puddle™</h1>
+          <div class="sub">Prototype PDP • Blanket + Bundles + Upsell</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="chip" href="#pdp">🧸 PDP</a>
+        <a class="chip" href="#bundles">📦 Бандлы</a>
+        <a class="chip" href="#trust">🛡️ Доверие</a>
+        <a class="chip" href="#faq">❓ FAQ</a>
+        <a class="chip" href="#notes">🧠 Комментарии</a>
+      </nav>
+
+      <div class="actions">
+        <span class="badge"><span class="dot"></span> Статус: готово к показу</span>
+        <button class="btn" id="openCart">🛒 Корзина <span class="mono" id="cartCount">(0)</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="heroTop">
+        <div>
+          <div class="kicker">🟣 <b>Цель</b> • показать команде, как выглядит “система” в Shopify</div>
+          <h2 class="title">Мы не “продаём плед”. <span>Мы строим систему</span> 💜</h2>
+          <p class="lead">
+            Этот макет демонстрирует правильную архитектуру:
+            <b>вход = плед</b> (безопасно для рекламы) → внутри Shopify добавляем
+            <b>логичный add-on</b> и <b>бандлы</b> → растут <b>AOV</b> и <b>LTV</b> без удвоения трафика.
+          </p>
+          <div class="pills">
+            <div class="pill ok">✅ В рекламе: <strong>только Blanket</strong></div>
+            <div class="pill warn">🔒 Private/WELLNESS: <strong>только внутри</strong></div>
+            <div class="pill">📦 Discreet shipping</div>
+            <div class="pill">🧾 FAQ + Policies + Trust</div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap;">
+          <button class="btn ghost" id="showAgeGate">🔒 Показать 18+ gate</button>
+          <button class="btn primary" id="demoAddToCart">⚡ Быстрый demo: добавить</button>
+        </div>
+      </div>
+
+      <div class="heroMain">
+        <!-- mock image -->
+        <div class="mock">
+          <div class="tag">🧸 Blanket • “Comfort / Clean / Calm”</div>
+          <div class="shape1"></div>
+          <div class="shape2"></div>
+          <div class="caption">
+            <div class="miniStat">
+              <b>Вход (Safe)</b>
+              Плед = понятная ценность, без рисков
+            </div>
+            <div class="miniStat">
+              <b>Profit layer</b>
+              Bundles + Add-on внутри Shopify
+            </div>
+          </div>
+        </div>
+
+        <!-- right mini -->
+        <div class="pdp" id="notes">
+          <div class="sectionTitle">
+            <h3>🧠 Комментарий для команды</h3>
+            <span class="tiny">макет = “как должно быть”</span>
+          </div>
+          <div class="note">
+            <b>Суть:</b> мы не меняем бренд. Мы добавляем “private wellness” как аккуратный апгрейд. <br>
+            <b>Реклама:</b> остаётся нейтральной. <br>
+            <b>Внутри:</b> бандлы и апселл поднимают чек. <br>
+            <span class="tiny">Это демонстрация логики UX: PDP → bundle → cart upsell → checkout.</span>
+          </div>
+          <ul class="list" style="margin-top:12px;">
+            <li>🎯 <b>Цель теста</b>: поднять AOV и Profit/Order без роста CPA.</li>
+            <li>🛡️ <b>Риск-контроль</b>: нейтральный copy + age-gate + discreet packaging.</li>
+            <li>📈 <b>Метрики</b>: AOV, CR, Profit/Order, Refund rate.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN GRID -->
+    <section class="grid">
+      <!-- LEFT COLUMN -->
+      <div>
+        <!-- PDP -->
+        <div class="card anchor" id="pdp">
+          <div class="inner">
+            <div class="sectionTitle">
+              <h3>🧸 Product Page (PDP) — Blanket</h3>
+              <span class="tiny mono">SKU: CP-BLANKET-01</span>
+            </div>
+
+            <p class="muted" style="margin: 0 0 10px; line-height:1.55;">
+              <b>Cuddle Puddle™ Waterproof Blanket</b> — ваш “безопасный вход” в рекламе.
+              Упор на комфорт, чистоту и спокойствие. Никаких спорных визуалов.
+            </p>
+
+            <div class="row2">
+              <div class="field">
+                <label>Размер</label>
+                <select id="sizeSelect">
+                  <option value="throw" selected>Throw (130×150)</option>
+                  <option value="queen">Queen (150×200)</option>
+                  <option value="king">King (200×230)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Цвет</label>
+                <select id="colorSelect">
+                  <option value="midnight" selected>Midnight (Dark)</option>
+                  <option value="lavender">Lavender</option>
+                  <option value="sand">Sand</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="priceRow">
+              <div class="priceBox">
+                <div class="strike" id="strikePrice">$129</div>
+                <div class="price mono" id="mainPrice">$99</div>
+                <div class="save" id="saveText">Сейчас −$30 (promo)</div>
+              </div>
+
+              <div class="pills">
+                <div class="pill">✅ Waterproof layer</div>
+                <div class="pill">✅ Soft top feel</div>
+                <div class="pill">✅ Easy care</div>
+                <div class="pill">🚚 Fast shipping</div>
+              </div>
+            </div>
+
+            <div class="ctaRow">
+              <button class="btn primary" id="addBlanketBtn">🛒 Add to cart</button>
+              <button class="btn ghost" id="scrollBundles">📦 Посмотреть бандлы</button>
+            </div>
+
+            <div class="note" style="margin-top:12px;">
+              ✍️ <b>Как говорить в команде:</b>
+              плед — “вход”, который конвертит. Дальше мы увеличиваем прибыль
+              через внутренний UX: <b>bundle</b> и <b>add-on</b>.
+            </div>
+
+            <!-- Add-on neutral wellness -->
+            <div class="addon">
+              <div class="addonHead">
+                <div>
+                  <h4>🔒 Private / Wellness Add-On (нейтрально)</h4>
+                  <div class="small">
+                    Это не “интим-магазин”. Это <b>взрослый self-care</b> и приватность.
+                    Показываем только внутри магазина. В рекламе — <b>никогда</b>.
+                  </div>
+                </div>
+                <span class="badge"><span class="dot" style="background: var(--warn); box-shadow: 0 0 0 6px rgba(255,209,102,.10)"></span> 18+</span>
+              </div>
+
+              <div class="addonBody">
+                <div class="addonLine">
+                  <div class="addonLeft">
+                    <div class="addonIcon">🔕</div>
+                    <div>
+                      <div class="addonName">Discreet Wellness Massager</div>
+                      <div class="addonMeta">Premium • Quiet • Easy clean • Discreet packaging</div>
+                    </div>
+                  </div>
+
+                  <div class="addonRight">
+                    <div class="mono" style="font-weight:950;">$59</div>
+                    <div class="toggle" id="addonToggle" role="switch" aria-checked="false" tabindex="0">
+                      <div class="switch"><div class="knob"></div></div>
+                      <div style="font-size:12px; font-weight:850;">Добавить</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="note" style="margin-top:10px;">
+                  🕵️‍♂️ <b>Discreet:</b> упаковка без явных слов. На банковской выписке — нейтральное название.
+                  <span class="tiny">(в реале это настраивается в Shopify: shipping + descriptor)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bundles -->
+            <div class="bundleGrid anchor" id="bundles">
+              <div class="sectionTitle" style="margin-top: 18px;">
+                <h3>📦 Bundles (готовые варианты)</h3>
+                <span class="tiny">всё должно продаваться “без давления”</span>
+              </div>
+
+              <div class="bundle">
+                <div class="bundleTop">
+                  <div>
+                    <h4>Bundle #1 — “Comfort Starter” 🧸✨</h4>
+                    <div class="hint">Blanket + Care (нейтрально)</div>
+                  </div>
+                  <span class="badge">⭐ Best seller bundle</span>
+                </div>
+                <div class="bundleItems">
+                  <span class="itemTag">🧸 Waterproof Blanket</span>
+                  <span class="itemTag">🧼 Care kit (gentle wash)</span>
+                </div>
+                <div class="bundleBottom">
+                  <div class="bundlePrice mono">$119 <small>save 12%</small></div>
+                  <button class="btn primary" data-bundle="starter">Добавить bundle →</button>
+                </div>
+              </div>
+
+              <div class="bundle">
+                <div class="bundleTop">
+                  <div>
+                    <h4>Bundle #2 — “Private Comfort” 🔒💜</h4>
+                    <div class="hint">Blanket + Discreet wellness add-on (18+)</div>
+                  </div>
+                  <span class="badge">🔒 Discreet</span>
+                </div>
+                <div class="bundleItems">
+                  <span class="itemTag">🧸 Waterproof Blanket</span>
+                  <span class="itemTag">🔕 Discreet Wellness Add-On</span>
+                </div>
+                <div class="bundleBottom">
+                  <div class="bundlePrice mono">$149 <small>save 10%</small></div>
+                  <button class="btn primary" data-bundle="private">Добавить bundle →</button>
+                </div>
+                <div class="tiny" style="margin-top:10px;">
+                  * В реальном Shopify: этот bundle показываем только после подтверждения возраста (age gate).
+                </div>
+              </div>
+
+              <div class="bundle">
+                <div class="bundleTop">
+                  <div>
+                    <h4>Bundle #3 — “Couple Night” 🌙🛏️</h4>
+                    <div class="hint">2× Blanket + Add-On (18+) — максимальный AOV</div>
+                  </div>
+                  <span class="badge">📈 AOV Booster</span>
+                </div>
+                <div class="bundleItems">
+                  <span class="itemTag">🧸 Blanket ×2</span>
+                  <span class="itemTag">🔕 Discreet Wellness Add-On</span>
+                </div>
+                <div class="bundleBottom">
+                  <div class="bundlePrice mono">$229 <small>save 15%</small></div>
+                  <button class="btn primary" data-bundle="couple">Добавить bundle →</button>
+                </div>
+              </div>
+
+              <div class="note" style="margin-top: 12px;">
+                🎯 <b>Зачем бандлы:</b> клиенту проще выбрать “готовое решение”, чем собирать самому.
+                Это поднимает AOV без давления и без изменения рекламы.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <aside class="side">
+        <!-- Trust -->
+        <div class="miniCard anchor" id="trust">
+          <div class="inner">
+            <h3>🛡️ Trust Layer (обязательный блок)</h3>
+            <ul class="list">
+              <li>🔒 <b>Secure checkout</b>: SSL + trusted payments (в реале — Shopify Payments / PayPal)</li>
+              <li>📦 <b>Discreet packaging</b>: без явных названий, приватно и спокойно</li>
+              <li>✅ <b>Easy returns</b>: понятная политика возврата + поддержка</li>
+              <li>⭐ <b>Reviews</b>: реальные отзывы + UGC (без спорного контента)</li>
+            </ul>
+            <div class="note" style="margin-top:12px;">
+              Мини-правило: <b>если нет доверия — апселл не взлетит.</b> Поэтому trust-слой — всегда до апселла.
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI explainer -->
+        <div class="miniCard">
+          <div class="inner">
+            <h3>📈 Что это даёт (по-простому)</h3>
+            <ul class="list">
+              <li>💵 <b>AOV ↑</b> — средний чек растёт за счёт bundle/add-on</li>
+              <li>🔁 <b>LTV ↑</b> — больше повторов через email/SMS + доп. покупки</li>
+              <li>🧠 <b>Меньше хаоса</b> — один доп. товар, один сценарий, один тест</li>
+            </ul>
+            <div class="tiny" style="margin-top:10px;">
+              Формула: <span class="mono">Profit ≈ (AOV × margin) − CPA</span>. Мы растим AOV/маржу без роста CPA.
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="miniCard anchor" id="faq">
+          <div class="inner faq">
+            <h3>❓ FAQ (как должно быть)</h3>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+              <details>
+                <summary>🧸 Плед реально waterproof?</summary>
+                <p>Да. В прототипе мы показываем “водонепроницаемый слой” как ключевую ценность: меньше стресса, меньше уборки, больше спокойствия.</p>
+              </details>
+              <details>
+                <summary>📦 Как выглядит упаковка?</summary>
+                <p>Нейтральная. Без явных названий. Это критично для доверия и снижения отказов/возвратов.</p>
+              </details>
+              <details>
+                <summary>🔒 Что за Private/WELLNESS раздел?</summary>
+                <p>Это “взрослый self-care” внутри магазина. В рекламе мы его не используем. Он появляется через UX: bundle и cart-upsell.</p>
+              </details>
+              <details>
+                <summary>↩️ Возвраты и гарантия?</summary>
+                <p>Понятная политика + быстрый саппорт. Чем проще правила — тем выше CR и ниже refund-rate.</p>
+              </details>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="miniCard anchor" id="notes2">
+          <div class="inner">
+            <h3>🧩 Для разработчика/темы Shopify</h3>
+            <ul class="list">
+              <li>🧠 <b>Age gate</b> — модалка/страница подтверждения 18+ для коллекции Private/WELLNESS</li>
+              <li>📦 <b>Bundles</b> — через app (bundles) или ручной bundle-product</li>
+              <li>🛒 <b>Cart upsell</b> — app или кастом скрипт в cart drawer</li>
+              <li>✉️ <b>Email/SMS</b> — welcome + abandon + post-purchase</li>
+            </ul>
+            <div class="note" style="margin-top:12px;">
+              Это не “игрушка”. Это blueprint, чтобы команда одинаково понимала:
+              <b>как должен выглядеть UX</b> и <b>почему он зарабатывает</b>.
+            </div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <footer style="padding: 24px 0 40px; color: rgba(255,255,255,.52);">
+      <div class="tiny">
+        © Cuddle Puddle™ Prototype • Сделано для команды (UX blueprint).  
+        <span class="mono">Tip:</span> если хочешь — добавлю ещё 2 PDP (post-purchase page + thank you upsell) в таком же стиле.
+      </div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast">✅ Добавлено в корзину</div>
+
+  <script>
+    // ---------- Demo Data ----------
+    const PRICES = {
+      blanket: { throw: 99, queen: 119, king: 139 },
+      addon: 59,
+      carekit: 29
+    };
+
+    // Bundles are simulated as sets of items
+    const BUNDLES = {
+      starter: {
+        name: "Bundle #1 — Comfort Starter 🧸✨",
+        items: [
+          { id:"blanket", name:"Cuddle Puddle™ Waterproof Blanket", meta:"1× Blanket (selected size/color)", priceRef:"blanket" },
+          { id:"carekit", name:"Gentle Care Kit 🧼", meta:"safe wash + care", price: PRICES.carekit }
+        ],
+        price: 119
+      },
+      private: {
+        name: "Bundle #2 — Private Comfort 🔒💜",
+        items: [
+          { id:"blanket", name:"Cuddle Puddle™ Waterproof Blanket", meta:"1× Blanket (selected size/color)", priceRef:"blanket" },
+          { id:"addon", name:"Discreet Wellness Add-On 🔕", meta:"Premium • Quiet • Discreet packaging", price: PRICES.addon }
+        ],
+        price: 149,
+        requires18: true
+      },
+      couple: {
+        name: "Bundle #3 — Couple Night 🌙🛏️",
+        items: [
+          { id:"blanket2", name:"Cuddle Puddle™ Waterproof Blanket ×2", meta:"2× Blanket (selected size/color)", price: 2 * PRICES.blanket.throw }, // recalculated later
+          { id:"addon", name:"Discreet Wellness Add-On 🔕", meta:"Premium • Quiet • Discreet packaging", price: PRICES.addon }
+        ],
+        price: 229,
+        requires18: true
+      }
+    };
+
+    // Cart state
+    const cart = []; // {key, id, name, meta, unitPrice, qty}
+
+    // Age gate state (stored in session)
+    const AGE_KEY = "cp_age_confirmed";
+
+    // ---------- Helpers ----------
+    const $ = (id) => document.getElementById(id);
+
+    function money(n){
+      return "$" + Number(n).toFixed(0);
+    }
+
+    function toast(msg="✅ Готово"){
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 1400);
+    }
+
+    function scrollToId(id){
+      const el = document.querySelector(id);
+      if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function getSelectedVariantMeta(){
+      const size = $("sizeSelect").value;
+      const color = $("colorSelect").value;
+      const sizeLabel = $("sizeSelect").selectedOptions[0].textContent;
+      const colorLabel = $("colorSelect").selectedOptions[0].textContent;
+      return { size, color, sizeLabel, colorLabel };
+    }
+
+    function currentBlanketPrice(){
+      const v = getSelectedVariantMeta();
+      return PRICES.blanket[v.size];
+    }
+
+    function updatePdpPrices(){
+      const p = currentBlanketPrice();
+      $("mainPrice").textContent = money(p);
+      // strike is artificial for demo
+      const strike = p + 30;
+      $("strikePrice").textContent = money(strike);
+      $("saveText").textContent = "Сейчас −" + money(strike - p) + " (promo)";
+    }
+
+    // ---------- Cart logic ----------
+    function cartKey(id, meta){
+      return id + "|" + (meta || "");
+    }
+
+    function addToCart({id, name, meta, unitPrice, qty=1}){
+      const key = cartKey(id, meta);
+      const existing = cart.find(x => x.key === key);
+      if(existing){ existing.qty += qty; }
+      else cart.push({ key, id, name, meta, unitPrice, qty });
+      renderCart();
+      toast("✅ Добавлено в корзину");
+    }
+
+    function removeFromCart(key){
+      const idx = cart.findIndex(x => x.key === key);
+      if(idx >= 0) cart.splice(idx, 1);
+      renderCart();
+    }
+
+    function changeQty(key, delta){
+      const item = cart.find(x => x.key === key);
+      if(!item) return;
+      item.qty += delta;
+      if(item.qty <= 0) removeFromCart(key);
+      else renderCart();
+    }
+
+    function cartTotal(){
+      return cart.reduce((sum, it) => sum + it.unitPrice * it.qty, 0);
+    }
+
+    function cartCount(){
+      return cart.reduce((sum, it) => sum + it.qty, 0);
+    }
+
+    function hasAddonInCart(){
+      return cart.some(it => it.id === "addon");
+    }
+
+    function renderCart(){
+      $("cartCount").textContent = "(" + cartCount() + ")";
+      $("cartTotal").textContent = money(cartTotal());
+
+      const container = $("cartItems");
+      container.innerHTML = "";
+
+      if(cart.length === 0){
+        container.innerHTML = `
+          <div class="note">
+            🛒 Корзина пустая. Добавь плед или выбери bundle — и смотри как работает upsell.
+          </div>
+        `;
+      }else{
+        cart.forEach(it => {
+          const el = document.createElement("div");
+          el.className = "cartItem";
+          el.innerHTML = `
+            <div style="flex:1;">
+              <div class="name">${escapeHtml(it.name)}</div>
+              <div class="meta">${escapeHtml(it.meta || "")}</div>
+              <div class="qty">
+                <button aria-label="minus">−</button>
+                <span class="mono">${it.qty}</span>
+                <button aria-label="plus">+</button>
+              </div>
+              <span class="remove">Удалить</span>
+            </div>
+            <div style="text-align:right;">
+              <div class="price mono">${money(it.unitPrice)}</div>
+              <div class="tiny" style="margin-top:6px;">за 1 шт.</div>
+            </div>
+          `;
+
+          const [minusBtn, plusBtn] = el.querySelectorAll(".qty button");
+          minusBtn.addEventListener("click", () => changeQty(it.key, -1));
+          plusBtn.addEventListener("click", () => changeQty(it.key, +1));
+          el.querySelector(".remove").addEventListener("click", () => removeFromCart(it.key));
+          container.appendChild(el);
+        });
+      }
+
+      // show cart upsell if blanket exists and addon not
+      const hasBlanket = cart.some(it => it.id === "blanket" || it.id === "blanket2");
+      const showUpsell = hasBlanket && !hasAddonInCart();
+      $("cartUpsell").style.display = showUpsell ? "block" : "none";
+    }
+
+    function openCart(){
+      $("drawerOverlay").classList.add("show");
+      $("drawer").classList.add("show");
+    }
+    function closeCart(){
+      $("drawerOverlay").classList.remove("show");
+      $("drawer").classList.remove("show");
+    }
+
+    // ---------- Age gate ----------
+    function isAgeConfirmed(){
+      return sessionStorage.getItem(AGE_KEY) === "1";
+    }
+    function showAgeGate(){
+      $("ageGate").classList.add("show");
+    }
+    function hideAgeGate(){
+      $("ageGate").classList.remove("show");
+    }
+    function confirmAge(){
+      sessionStorage.setItem(AGE_KEY, "1");
+      hideAgeGate();
+      toast("✅ 18+ подтверждено");
+    }
+    function leaveSite(){
+      // simple: redirect to blank or show message
+      document.body.innerHTML = `
+        <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; text-align:center;">
+          <div class="card" style="max-width:720px; width:100%;">
+            <div class="inner">
+              <div class="kicker">👋 <b>Вы вышли</b> • demo прототип</div>
+              <h2 style="margin:12px 0 6px;">Доступ ограничен</h2>
+              <p class="muted" style="margin:0; line-height:1.6;">
+                Этот раздел предназначен для 18+. Вернись, когда будешь готов подтвердить возраст.
+              </p>
+              <div style="margin-top:14px;">
+                <button class="btn primary" onclick="location.reload()">Вернуться</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ---------- Actions on page ----------
+    function addBlanket(){
+      const v = getSelectedVariantMeta();
+      addToCart({
+        id: "blanket",
+        name: "Cuddle Puddle™ Waterproof Blanket",
+        meta: `Размер: ${v.sizeLabel} • Цвет: ${v.colorLabel}`,
+        unitPrice: currentBlanketPrice(),
+        qty: 1
+      });
+      openCart();
+    }
+
+    function setAddonToggle(on){
+      const t = $("addonToggle");
+      if(on){
+        t.classList.add("on");
+        t.setAttribute("aria-checked", "true");
+      }else{
+        t.classList.remove("on");
+        t.setAttribute("aria-checked", "false");
+      }
+    }
+
+    function toggleAddon(){
+      // require age gate for addon toggle
+      if(!isAgeConfirmed()){
+        showAgeGate();
+        return;
+      }
+
+      const on = $("addonToggle").classList.contains("on");
+      if(!on){
+        setAddonToggle(true);
+        addToCart({
+          id: "addon",
+          name: "Discreet Wellness Add-On 🔕",
+          meta: "Premium • Quiet • Discreet packaging",
+          unitPrice: PRICES.addon,
+          qty: 1
+        });
+      }else{
+        setAddonToggle(false);
+        // remove all addon lines
+        const keys = cart.filter(it => it.id === "addon").map(it => it.key);
+        keys.forEach(removeFromCart);
+        toast("🗑️ Add-on убран");
+      }
+      renderCart();
+    }
+
+    function addBundle(bundleKey){
+      const b = BUNDLES[bundleKey];
+      if(!b) return;
+
+      // if requires 18+ -> enforce
+      if(b.requires18 && !isAgeConfirmed()){
+        showAgeGate();
+        return;
+      }
+
+      const v = getSelectedVariantMeta();
+      const blanketPrice = currentBlanketPrice();
+
+      // Add bundle as a single line item (simpler for demo)
+      let meta = "Bundle items: ";
+      if(bundleKey === "starter"){
+        meta += `Blanket (${v.sizeLabel}/${v.colorLabel}) + Care kit`;
+      }
+      if(bundleKey === "private"){
+        meta += `Blanket (${v.sizeLabel}/${v.colorLabel}) + Discreet add-on`;
+      }
+      if(bundleKey === "couple"){
+        meta += `2× Blanket (${v.sizeLabel}/${v.colorLabel}) + Discreet add-on`;
+      }
+
+      // Ensure couple bundle reflects selected blanket price for 2x (but keep bundle fixed demo price)
+      // In real Shopify, bundle pricing is defined or discount rules apply.
+
+      addToCart({
+        id: "bundle_" + bundleKey,
+        name: b.name,
+        meta,
+        unitPrice: b.price,
+        qty: 1
+      });
+
+      // visually set toggle if private/couple includes addon (optional)
+      if(bundleKey !== "starter"){
+        setAddonToggle(true);
+      }
+
+      openCart();
+    }
+
+    function addCartUpsellAddon(){
+      if(!isAgeConfirmed()){
+        showAgeGate();
+        return;
+      }
+      addToCart({
+        id: "addon",
+        name: "Discreet Wellness Add-On 🔕",
+        meta: "Premium • Quiet • Discreet packaging",
+        unitPrice: PRICES.addon,
+        qty: 1
+      });
+      setAddonToggle(true);
+      renderCart();
+    }
+
+    function checkout(){
+      if(cart.length === 0){
+        toast("⚠️ Корзина пустая");
+        return;
+      }
+      // demo checkout page
+      const items = cart.map(it => `• ${it.name} ×${it.qty} — ${money(it.unitPrice * it.qty)}`).join("\n");
+      alert("✅ DEMO CHECKOUT\n\nЗаказ:\n" + items + "\n\nИтого: " + money(cartTotal()) + "\n\n(В реальном Shopify: переход на /checkout)");
+    }
+
+    // ---------- Security / escape ----------
+    function escapeHtml(str){
+      return (str || "").replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    // ---------- Wire up ----------
+    window.addEventListener("DOMContentLoaded", () => {
+      updatePdpPrices();
+
+      $("sizeSelect").addEventListener("change", () => {
+        updatePdpPrices();
+      });
+
+      $("colorSelect").addEventListener("change", () => {
+        // no price changes; just for meta
+      });
+
+      $("addBlanketBtn").addEventListener("click", addBlanket);
+      $("demoAddToCart").addEventListener("click", () => {
+        addBlanket();
+        // show cart upsell by default (addon not included yet)
+      });
+
+      $("scrollBundles").addEventListener("click", () => scrollToId("#bundles"));
+
+      // addon toggle
+      $("addonToggle").addEventListener("click", toggleAddon);
+      $("addonToggle").addEventListener("keydown", (e) => {
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          toggleAddon();
+        }
+      });
+
+      // bundles buttons
+      document.querySelectorAll("[data-bundle]").forEach(btn => {
+        btn.addEventListener("click", () => addBundle(btn.getAttribute("data-bundle")));
+      });
+
+      // cart open/close
+      $("openCart").addEventListener("click", openCart);
+      $("closeCart").addEventListener("click", closeCart);
+      $("drawerOverlay").addEventListener("click", closeCart);
+
+      // cart upsell
+      $("addUpsellBtn").addEventListener("click", addCartUpsellAddon);
+
+      // checkout
+      $("checkoutBtn").addEventListener("click", checkout);
+      $("checkoutBtn").addEventListener("keydown", (e)=>{ if(e.key==="Enter") checkout(); });
+
+      // age gate controls
+      $("showAgeGate").addEventListener("click", showAgeGate);
+      $("confirmAge").addEventListener("click", confirmAge);
+      $("leaveSite").addEventListener("click", leaveSite);
+
+      // initial render
+      renderCart();
+    });
+  </script>
+</body>
+</html>
